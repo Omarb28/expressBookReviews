@@ -26,57 +26,85 @@ public_users.post("/register", (req,res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  res.send(JSON.stringify(books, null, 4));
+public_users.get('/', function(req, res) {
+  let promise = new Promise((resolve, reject) => {
+    const books_list = JSON.stringify(books, null, 4);
+    resolve(books_list);
+  });
+  
+  promise.then((books_list) => {
+    res.send(books_list);
+  });
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   const isbn = req.params.isbn;
-  const book = books[isbn];
-  if (book) {
-    res.send(books[isbn]);
-  } else {
-    res.status(404).json({message: `No book found with ISBN (${isbn})`});
-  }
+
+  let promise = new Promise((resolve, reject) => {
+    const book = books[isbn];
+    resolve(book);
+  });
+
+  promise.then((book) => {
+    if (book) {
+      res.send(books[isbn]);
+    } else {
+      res.status(404).json({message: `No book found with ISBN (${isbn})`});
+    }
+  })
 });
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   const author = req.params.author;
-  let filtered_books = {}
 
-  for (const book_key in books) {
-    const book = books[book_key];
-    if (book.author === author) {
-      filtered_books[book_key] = book;
+  let promise = new Promise((resolve, reject) => {
+    let filtered_books = {}
+
+    for (const book_key in books) {
+      const book = books[book_key];
+      if (book.author === author) {
+        filtered_books[book_key] = book;
+      }
     }
-  }
 
-  if (Object.keys(filtered_books).length > 0) {
-    res.send(filtered_books);
-  } else {
-    res.status(404).json({message: `No book found with author (${author})`});
-  }
+    resolve(filtered_books);
+  });
+
+  promise.then((filtered_books) => {
+    if (Object.keys(filtered_books).length === 0) {
+      res.status(404).json({message: `No book found with author (${author})`});
+    } else {
+      res.send(filtered_books);
+    }
+  });
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   const title = req.params.title;
-  let filtered_books = {}
 
-  for (const book_key in books) {
-    const book = books[book_key];
-    if (book.title === title) {
-      filtered_books[book_key] = book;
+  let promise = new Promise((resolve, reject) => {
+    let filtered_books = {}
+
+    for (const book_key in books) {
+      const book = books[book_key];
+      if (book.title === title) {
+        filtered_books[book_key] = book;
+      }
     }
-  }
 
-  if (Object.keys(filtered_books).length > 0) {
-    res.send(filtered_books);
-  } else {
-    res.status(404).json({message: `No book found with title (${title})`});
-  }
+    resolve(filtered_books);
+  });
+
+  promise.then((filtered_books) => {
+    if (Object.keys(filtered_books).length === 0) {
+      res.status(404).json({message: `No book found with title (${title})`});
+    } else {
+      res.send(filtered_books);
+    }
+  });
 });
 
 // Get book review
